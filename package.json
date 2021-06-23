@@ -1,0 +1,36 @@
+{
+  "name": "reason-jsonm",
+  "version": "1.0.1",
+  "description": "Jsonm — Non-blocking streaming JSON codec for OCaml",
+  "main": "index.js",
+  "directories": {
+    "doc": "doc",
+    "test": "test"
+  },
+  "scripts": {
+    "build": "bsb -make-world",
+    "start": "bsb -make-world -w",
+    "clean": "bsb -clean-world",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dbuenzli/jsonm.git"
+  },
+  "keywords": [
+    "reason",
+    "json",
+    "codec",
+    "org:erratique"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dbuenzli/jsonm/issues"
+  },
+  "homepage": "https://github.com/dbuenzli/jsonm#readme",
+
+  "devDependencies": {
+    "bs-platform": "^9.0.2"
+  }
+}

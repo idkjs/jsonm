@@ -14,7 +14,7 @@ under the ISC license.
 
 [uutf]: http://erratique.ch/software/uutf
 
-Home page: http://erratique.ch/software/jsonm  
+Home page: http://erratique.ch/software/jsonm
 Contact: Daniel Bünzli `<daniel.buenzl i@erratique.ch>`
 
 
@@ -51,3 +51,4 @@ directory of the distribution. They can be built with:
     ocamlbuild -use-ocamlfind test/tests.otarget
 
 The resulting binaries are in `_build/test`.
+      "files": [ "jsonm.re", "jsonm.rei","uutf.re", "uutf.rei" ],

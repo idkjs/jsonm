@@ -9,3 +9,11 @@ dist
 *.install
 *.byte
 CLOCK.org
+
+*.bs.js
+lib/bs
+node_modules
+.bsb.lock
+.merlin
+
+.DS_Store

@@ -1,0 +1,25 @@
+{
+  "name": "reason-jsonm",
+  "version": "1.0.2",
+  "sources": [
+    {
+      "dir": "src",
+
+      "subdirs": true
+    },
+    {
+      "dir": "test",
+      "dev": true
+    }
+  ],
+  "package-specs": {
+    "module": "commonjs",
+    "in-source": true
+  },
+  "suffix": ".bs.js",
+  "bs-dependencies": [],
+  "warnings": {
+    "number": "-109-6-39-27-32-3-105-103",
+    "error": "+101-109-6-39-27"
+  }
+}
