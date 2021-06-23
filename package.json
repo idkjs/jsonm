@@ -3,10 +3,11 @@
   "version": "1.0.1",
   "description": "Jsonm — Non-blocking streaming JSON codec for OCaml",
   "main": "index.js",
-  "directories": {
-    "doc": "doc",
-    "test": "test"
-  },
+  "files": [
+    "src",
+    "opam",
+    "bsconfig.json"
+  ],
   "scripts": {
     "build": "bsb -make-world",
     "start": "bsb -make-world -w",

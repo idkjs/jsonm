@@ -17,3 +17,5 @@ node_modules
 .merlin
 
 .DS_Store
+.vscode/settings.json
+.merlin

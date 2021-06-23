@@ -19,7 +19,7 @@ let json_of_src =
     switch (Jsonm.decode(d)) {
     | `Lexeme(l) => l
     | `Error(e) =>
-      raise([@implicit_arity] Escape(Jsonm.decoded_range(d), e))
+      raise( Escape(Jsonm.decoded_range(d), e))
     | `End
     | `Await => assert(false)
     };
@@ -45,7 +45,7 @@ let json_of_src =
 
   let d = Jsonm.decoder(~encoding?, src);
   try(`JSON(value(dec(d), (v, _) => v, d))) {
-  | [@implicit_arity] Escape(r, e) => `Error((r, e))
+  |  Escape(r, e) => `Error((r, e))
   };
 };
 
