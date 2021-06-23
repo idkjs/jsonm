@@ -1,9 +1,9 @@
-(*---------------------------------------------------------------------------
+/*---------------------------------------------------------------------------
    Copyright (c) 2012 The jsonm programmers. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
-  ---------------------------------------------------------------------------*)
+  ---------------------------------------------------------------------------*/
 
-(** Non-blocking streaming JSON codec.
+/** Non-blocking streaming JSON codec.
 
     [Jsonm] is a non-blocking streaming codec to
     {{!section:decode}decode} and {{!section:encode}encode} the
@@ -21,21 +21,11 @@
     {ul
     {- T. Bray Ed.
     {e {{:http://tools.ietf.org/html/rfc7159}The JavaScript Object Notation
-    (JSON) Data Interchange Format}, 2014}}} *)
+    (JSON) Data Interchange Format}, 2014}}} */
 
-(** {1:datamodel JSON data model} *)
+/** {1:datamodel JSON data model} */
 
-type lexeme = [
-| `Null
-| `Bool of bool
-| `String of string
-| `Float of float
-| `Name of string
-| `As
-| `Ae
-| `Os
-| `Oe ]
-(** The type for JSON lexemes. [`As] and [`Ae]
+/** The type for JSON lexemes. [`As] and [`Ae]
     start and end arrays and [`Os] and [`Oe] start
     and end objects. [`Name] is for the member names of objects.
 
@@ -64,56 +54,85 @@ member = (`Name s) value
     encoded, this is {b not} checked by the module. In these strings,
     the delimiter characters [U+0022] and [U+005C] (['"'], ['\'])
     aswell as the control characters [U+0000-U+001F] are automatically
-    escaped by the encoders, as mandated by the standard. *)
+    escaped by the encoders, as mandated by the standard. */
 
-val pp_lexeme : Format.formatter -> [< lexeme] -> unit
-(** [pp_lexeme ppf l] prints a unspecified non-JSON representation of [l]
-    on [ppf]. *)
+type lexeme = [
+  | `Null
+  | `Bool(bool)
+  | `String(string)
+  | `Float(float)
+  | `Name(string)
+  | `As
+  | `Ae
+  | `Os
+  | `Oe
+];
 
-(** {1:decode Decode} *)
+/** [pp_lexeme ppf l] prints a unspecified non-JSON representation of [l]
+    on [ppf]. */
+
+let pp_lexeme: (Format.formatter, [< lexeme]) => unit;
+
+/** {1:decode Decode} */
 
 type error = [
-| `Illegal_BOM
-| `Illegal_escape of
-    [ `Not_hex_uchar of Uchar.t
-    | `Not_esc_uchar of Uchar.t
-    | `Not_lo_surrogate of int
-    | `Lone_lo_surrogate of int
-    | `Lone_hi_surrogate of int ]
-| `Illegal_string_uchar of Uchar.t
-| `Illegal_bytes of string
-| `Illegal_literal of string
-| `Illegal_number of string
-| `Unclosed of [ `As | `Os | `String | `Comment ]
-| `Expected of
-    [ `Comment | `Value | `Name | `Name_sep | `Json | `Eoi
-    | `Aval of bool (* [true] if first array value  *)
-    | `Omem of bool (* [true] if first object member *) ]]
+  | `Illegal_BOM
+  | `Illegal_escape(
+      [
+        | `Not_hex_uchar(Uchar.t)
+        | `Not_esc_uchar(Uchar.t)
+        | `Not_lo_surrogate(int)
+        | `Lone_lo_surrogate(int)
+        | `Lone_hi_surrogate(int)
+      ],
+    )
+  | `Illegal_string_uchar(Uchar.t)
+  | `Illegal_bytes(string)
+  | `Illegal_literal(string)
+  | `Illegal_number(string)
+  | `Unclosed([ | `As | `Os | `String | `Comment])
+  | `Expected(
+      [
+        | `Comment
+        | `Value
+        | `Name
+        | `Name_sep
+        | `Json
+        | `Eoi
+        | `Aval(bool)
+        | `Omem(bool /* [true] if first object member */)
+      ],
+    ) /* [true] if first array value  */
+];
 
-(** The type for decoding errors. *)
+/** The type for decoding errors. */
 
-val pp_error : Format.formatter -> [< error] -> unit
-(** [pp_error e] prints an unspecified UTF-8 representation of [e] on [ppf]. *)
+/** [pp_error e] prints an unspecified UTF-8 representation of [e] on [ppf]. */
 
-type encoding = [ `UTF_8 | `UTF_16 | `UTF_16BE | `UTF_16LE ]
-(** The type for Unicode encoding schemes. *)
+let pp_error: (Format.formatter, [< error]) => unit;
 
-type src = [ `Channel of in_channel | `String of string | `Manual ]
-(** The type for input sources. With a [`Manual] source the client
-    must provide input with {!Manual.src}. *)
+/** The type for Unicode encoding schemes. */
 
-type decoder
-(** The type for JSON decoders. *)
+type encoding = [ | `UTF_8 | `UTF_16 | `UTF_16BE | `UTF_16LE];
 
-val decoder :?encoding:[< encoding] -> [< src] -> decoder
-(** [decoder encoding src] is a JSON decoder that inputs from [src].
+/** The type for input sources. With a [`Manual] source the client
+    must provide input with {!Manual.src}. */
+
+type src = [ | `Channel(in_channel) | `String(string) | `Manual];
+
+/** The type for JSON decoders. */
+
+type decoder;
+
+/** [decoder encoding src] is a JSON decoder that inputs from [src].
     [encoding] specifies the character encoding of the data. If unspecified
     the encoding is guessed as
     {{:http://tools.ietf.org/html/rfc4627#section-3}suggested} by
-    the old RFC4627 standard. *)
+    the old RFC4627 standard. */
 
-val decode : decoder -> [> `Await | `Lexeme of lexeme | `End | `Error of error ]
-(** [decode d] is:
+let decoder: (~encoding: [< encoding]=?, [< src]) => decoder;
+
+/** [decode d] is:
     {ul
     {- [`Await] if [d] has a [`Manual] source and awaits for more input.
        The client must use {!Manual.src} to provide it.}
@@ -127,41 +146,47 @@ val decode : decoder -> [> `Await | `Lexeme of lexeme | `End | `Error of error ]
     The {!Uncut.pp_decode} function can be used to inspect decode results.
 
     {b Note.} Repeated invocation always eventually returns [`End], even
-    in case of errors. *)
+    in case of errors. */
 
-val decoded_range : decoder -> (int * int) * (int * int)
-(** [decoded_range d] is the range of characters spanning the last
+let decode: decoder => [> | `Await | `Lexeme(lexeme) | `End | `Error(error)];
+
+/** [decoded_range d] is the range of characters spanning the last
     [`Lexeme] or [`Error] (or [`White] or [`Comment] for an
     {!Uncut.decode}) decoded by [d].  A pair of line and column numbers
-    respectively one and zero based. *)
+    respectively one and zero based. */
 
-val decoder_encoding : decoder -> encoding
-(** [decoder_encoding d] is [d]'s encoding.
+let decoded_range: decoder => ((int, int), (int, int));
+
+/** [decoder_encoding d] is [d]'s encoding.
 
     {b Warning.} If the decoder guesses the encoding, rely on this
-    value only after the first [`Lexeme] was decoded. *)
+    value only after the first [`Lexeme] was decoded. */
 
-val decoder_src : decoder -> src
-(** [decoder_src d] is [d]'s input source. *)
+let decoder_encoding: decoder => encoding;
 
-(** {1:encode Encode} *)
+/** [decoder_src d] is [d]'s input source. */
 
-type dst = [ `Channel of out_channel | `Buffer of Buffer.t | `Manual ]
-(** The type for output destinations. With a [`Manual] destination the
-    client must provide output storage with {!Manual.dst}. *)
+let decoder_src: decoder => src;
 
-type encoder
-(** The type for JSON encoders. *)
+/** {1:encode Encode} */
 
-val encoder : ?minify:bool -> [< dst] -> encoder
-(** [encoder minify dst] is an encoder that outputs to [dst]. If
+/** The type for output destinations. With a [`Manual] destination the
+    client must provide output storage with {!Manual.dst}. */
+
+type dst = [ | `Channel(out_channel) | `Buffer(Buffer.t) | `Manual];
+
+/** The type for JSON encoders. */
+
+type encoder;
+
+/** [encoder minify dst] is an encoder that outputs to [dst]. If
     [minify] is [true] (default) the output is made as compact as
     possible, otherwise the output is indented. If you want better
-    control on whitespace use [minify = true] and {!Uncut.encode}. *)
+    control on whitespace use [minify = true] and {!Uncut.encode}. */
 
-val encode : encoder -> [< `Await | `End | `Lexeme of lexeme ] ->
-  [`Ok | `Partial]
-(** [encode e v] is:
+let encoder: (~minify: bool=?, [< dst]) => encoder;
+
+/** [encode e v] is:
     {ul
     {- [`Partial] iff [e] has a [`Manual] destination and needs more
        output storage. The client must use {!Manual.dst} to provide
@@ -176,41 +201,49 @@ val encode : encoder -> [< `Await | `End | `Lexeme of lexeme ] ->
 
     {b Raises.} [Invalid_argument] if a non {{!datamodel}well-formed}
     sequence of lexemes is encoded or if [`Lexeme] or [`End] is
-    encoded after a [`Partial] encode. *)
+    encoded after a [`Partial] encode. */
 
-val encoder_dst : encoder -> dst
-(** [encoder_dst e] is [e]'s output destination. *)
+let encode:
+  (encoder, [< | `Await | `End | `Lexeme(lexeme)]) => [ | `Ok | `Partial];
 
-val encoder_minify : encoder -> bool
-(** [encoder_minify e] is [true] if [e]'s output is minified. *)
+/** [encoder_dst e] is [e]'s output destination. */
 
-(** {1:manual Manual sources and destinations} *)
+let encoder_dst: encoder => dst;
 
-(** Manual input sources and output destinations.
+/** [encoder_minify e] is [true] if [e]'s output is minified. */
 
-    {b Warning.} Use only with [`Manual] decoders and encoders. *)
-module Manual : sig
+let encoder_minify: encoder => bool;
 
-  val src : decoder -> Bytes.t -> int -> int -> unit
-  (** [src d s j l] provides [d] with [l] bytes to read, starting
+/** {1:manual Manual sources and destinations} */
+
+/** Manual input sources and output destinations.
+
+    {b Warning.} Use only with [`Manual] decoders and encoders. */
+
+module Manual: {
+  /** [src d s j l] provides [d] with [l] bytes to read, starting
       at [j] in [s]. This byte range is read by calls to {!decode} until
       [`Await] is returned. To signal the end of input call the function
-      with [l = 0]. *)
+      with [l = 0]. */
 
-  val dst : encoder -> Bytes.t -> int -> int -> unit
-  (** [dst e s j l] provides [e] with [l] bytes to write, starting
+  let src: (decoder, Bytes.t, int, int) => unit;
+
+  /** [dst e s j l] provides [e] with [l] bytes to write, starting
       at [j] in [s]. This byte range is written by calls to {!encode} with [e]
       until [`Partial] is returned. Use {!dst_rem} to know the remaining
-      number of non-written free bytes in [s]. *)
+      number of non-written free bytes in [s]. */
 
-  val dst_rem : encoder -> int
-  (** [dst_rem e] is the remaining number of non-written, free bytes
-      in the last buffer provided with {!dst}. *)
-end
+  let dst: (encoder, Bytes.t, int, int) => unit;
 
-(** {1:uncut Uncut codec} *)
+  /** [dst_rem e] is the remaining number of non-written, free bytes
+      in the last buffer provided with {!dst}. */
 
-(** Codec with comments and whitespace.
+  let dst_rem: encoder => int;
+};
+
+/** {1:uncut Uncut codec} */
+
+/** Codec with comments and whitespace.
 
     The uncut codec also processes whitespace and JavaScript
     comments. The latter is non-standard JSON, fail on [`Comment]
@@ -228,10 +261,10 @@ end
        commute with these separators.}
     {- Internally the encoder uses [U+000A] (['\n']) for newlines.}
     {- [`Float] lexemes may be rewritten differently by the encoder.}}
-*)
-module Uncut : sig
+*/
 
-  (** {1:uncutdatamodel Uncut data model}
+module Uncut: {
+/** {1:uncutdatamodel Uncut data model}
 
       The uncut data model is the same as the regular
       {{!datamodel}data model}, except that before or after any lexeme
@@ -249,40 +282,67 @@ module Uncut : sig
       {- [`Comment (`M, c)], representing a JavaScript multi-line
       comment [c]. [c] is the comment's content without the starting
       [/*] and the ending [*/]. The string [c] must not contain the
-      sequence [*/]. }}
+      sequence  }}
 
       {b Warning.} {!Uncut.encode} does not check the above constraints on
-      [w] and [c]. *)
+      [w] and [c]. */
 
-  (** {1 Decode} *)
+  /** {1 Decode} */
 
-  val decode : decoder ->
-    [ `Await | `Lexeme of lexeme | `White of string
-    | `Comment of [ `S | `M ] * string
-    | `End | `Error of error ]
-  (** [decode d] is like {!Jsonm.decode} but for the
-      {{!uncutdatamodel}uncut data model}. *)
+  /** [decode d] is like {!Jsonm.decode} but for the
+      {{!uncutdatamodel}uncut data model}. */
 
-  val pp_decode : Format.formatter ->
-    [< `Await | `Lexeme of lexeme | `White of string
-    | `Comment of [ `S | `M ] * string
-    | `End | `Error of error ] -> unit
-  (** [pp_decode ppf v] prints an unspecified representation of [v]
-      on [ppf]. *)
+  let decode:
+    decoder =>
+    [
+      | `Await
+      | `Lexeme(lexeme)
+      | `White(string)
+      | `Comment([ | `S | `M], string)
+      | `End
+      | `Error(error)
+    ];
 
-  (** {1 Encode} *)
+  /** [pp_decode ppf v] prints an unspecified representation of [v]
+      on [ppf]. */
 
-  val encode : encoder ->
-    [< `Await | `Lexeme of lexeme | `White of string
-    | `Comment of [`S | `M] * string |  `End ] -> [`Ok | `Partial]
-  (** [encode] is like {!Jsonm.encode} but for the {{!uncutdatamodel}
+  let pp_decode:
+    (
+      Format.formatter,
+      [<
+        | `Await
+        | `Lexeme(lexeme)
+        | `White(string)
+        | `Comment([ | `S | `M], string)
+        | `End
+        | `Error(error)
+      ]
+    ) =>
+    unit;
+
+  /** {1 Encode} */
+
+  /** [encode] is like {!Jsonm.encode} but for the {{!uncutdatamodel}
       uncut data model}.
 
       {b IMPORTANT.} Never encode [`Comment] for the web, it is
-      non-standard and breaks interoperability. *)
-end
+      non-standard and breaks interoperability. */
 
-(** {1:limitations Limitations}
+  let encode:
+    (
+      encoder,
+      [<
+        | `Await
+        | `Lexeme(lexeme)
+        | `White(string)
+        | `Comment([ | `S | `M], string)
+        | `End
+      ]
+    ) =>
+    [ | `Ok | `Partial];
+};
+
+/** {1:limitations Limitations}
 
     {2 Decode}
 
@@ -331,9 +391,9 @@ end
     {- If the {{!Uncut}uncut} codec is used [`White] must be made
        of {{!Uncut.uncutdatamodel}JSON whitespace} and [`Comment]
        must never be encoded.}}
-*)
+*/
 
-(** {1:errorrecovery Error recovery}
+/** {1:errorrecovery Error recovery}
 
     After a decoding error, if best-effort decoding is performed. The following
     happens before continuing:
@@ -349,9 +409,9 @@ end
     {- [`Expected r], input is discarded until a synchronyzing lexeme
        that depends on [r] is found.}
     {- [`Unclosed], the end of input is reached, further decodes will be
-       [`End]}} *)
+       [`End]}} */
 
-(** {1:examples Examples}
+/** {1:examples Examples}
 
     {2:filter Trip}
 
@@ -493,9 +553,9 @@ let json_to_dst ~minify
   let finish e = ignore (Jsonm.encode e `End) in
   value json finish e
 ]}
-*)
+*/
 
-(*---------------------------------------------------------------------------
+/*---------------------------------------------------------------------------
    Copyright (c) 2012 The jsonm programmers
 
    Permission to use, copy, modify, and/or distribute this software for any
@@ -509,4 +569,4 @@ let json_to_dst ~minify
    WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
    ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
    OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-  ---------------------------------------------------------------------------*)
+  ---------------------------------------------------------------------------*/
